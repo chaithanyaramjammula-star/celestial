@@ -2,7 +2,7 @@ export const planets = [
     {
         name: "Mercury",
         radius: 0.5,
-        distance: 20,
+        distance: 15,
         speed: 0.8,
         color: "#A5A5A5",
         description: "The smallest planet in the Solar System and the closest to the Sun.",
@@ -16,7 +16,7 @@ export const planets = [
     {
         name: "Venus",
         radius: 0.9,
-        distance: 35,
+        distance: 25,
         speed: 0.6,
         color: "#E3BB76",
         description: "The second planet from the Sun. It has a thick atmosphere.",
@@ -30,7 +30,7 @@ export const planets = [
     {
         name: "Earth",
         radius: 1,
-        distance: 50,
+        distance: 35,
         speed: 0.5,
         color: "#22A6B3",
         hasAtmosphere: true,
@@ -48,7 +48,7 @@ export const planets = [
     {
         name: "Mars",
         radius: 0.7,
-        distance: 65,
+        distance: 45,
         speed: 0.4,
         color: "#E05036",
         hasAtmosphere: true,
@@ -64,7 +64,7 @@ export const planets = [
     {
         name: "Jupiter",
         radius: 3.5,
-        distance: 130,
+        distance: 90,
         speed: 0.2,
         color: "#D4A373",
         description: "The largest planet in the Solar System.",
@@ -77,7 +77,7 @@ export const planets = [
     {
         name: "Saturn",
         radius: 3,
-        distance: 160,
+        distance: 120,
         speed: 0.15,
         color: "#E2BF65",
         hasRings: true,
@@ -92,7 +92,7 @@ export const planets = [
     {
         name: "Uranus",
         radius: 2,
-        distance: 200,
+        distance: 150,
         speed: 0.1,
         color: "#7DE3F4",
         hasRings: true, // Thin rings
@@ -107,7 +107,7 @@ export const planets = [
     {
         name: "Neptune",
         radius: 2,
-        distance: 240,
+        distance: 180,
         speed: 0.08,
         color: "#3E54E8",
         description: "Dark, cold, and whipped by supersonic winds. It is the last of the planets.",

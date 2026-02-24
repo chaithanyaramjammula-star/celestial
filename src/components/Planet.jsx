@@ -28,6 +28,45 @@ void main() {
 }
 `
 
+// Enhanced Saturn Rings Shader
+const ringsVertexShader = `
+varying vec2 vUv;
+varying vec3 vPosition;
+void main() {
+    vUv = uv;
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`
+
+const ringsFragmentShader = `
+uniform vec3 uColor;
+varying vec2 vUv;
+varying vec3 vPosition;
+
+void main() {
+    // Distance from center (0.0 at inner edge, 1.0 at outer edge)
+    float dist = length(vPosition.xz);
+    
+    // Normalize to ring width
+    float innerRadius = 1.4;
+    float outerRadius = 2.2;
+    float normalizedDist = (dist - innerRadius) / (outerRadius - innerRadius);
+    
+    // Create bands using sine waves
+    float bands = sin(normalizedDist * 40.0) * 0.3 + 0.7;
+    
+    // Radial transparency gradient (fade at edges)
+    float alpha = smoothstep(0.0, 0.1, normalizedDist) * smoothstep(1.0, 0.9, normalizedDist);
+    alpha *= 0.7; // Overall transparency
+    
+    // Apply bands to alpha for variation
+    alpha *= bands;
+    
+    gl_FragColor = vec4(uColor, alpha);
+}
+`
+
 
 
 export default function Planet({ planet, ...props }) {
@@ -143,11 +182,15 @@ export default function Planet({ planet, ...props }) {
             {hasRings && (
                 <mesh rotation={[-Math.PI / 2, 0, 0]}>
                     <ringGeometry args={[radius * 1.4, radius * 2.2, 64]} />
-                    <meshStandardMaterial
-                        color={color}
-                        opacity={0.6}
+                    <shaderMaterial
+                        vertexShader={ringsVertexShader}
+                        fragmentShader={ringsFragmentShader}
                         transparent
                         side={THREE.DoubleSide}
+                        depthWrite={false}
+                        uniforms={{
+                            uColor: { value: new THREE.Color(color) }
+                        }}
                     />
                 </mesh>
             )}

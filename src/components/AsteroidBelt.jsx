@@ -10,13 +10,14 @@ export default function AsteroidBelt({ count = 5000 }) {
     const asteroids = useMemo(() => {
         const data = []
         for (let i = 0; i < count; i++) {
-            // Distance roughly between Mars (65) and Jupiter (120)
-            // 80 to 95 units
-            const radius = 80 + Math.random() * 15
+            // Distance roughly between Mars (45) and Jupiter (90) - New Scope
+            // 55 to 70 units
+            const radius = 55 + Math.random() * 15
             const angle = Math.random() * Math.PI * 2
 
+            // Random speed inversely proportional to distance (Kepler-ish)
             // speed factor
-            const speed = (0.2 + Math.random() * 0.2) * (80 / radius)
+            const speed = (0.2 + Math.random() * 0.2) * (55 / radius)
 
             // Random scale
             const scale = 0.05 + Math.random() * 0.15

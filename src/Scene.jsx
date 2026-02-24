@@ -16,6 +16,7 @@ import { planets } from './data/planets'
 
 import { useThree, useFrame } from '@react-three/fiber'
 import { useRef, useEffect } from 'react'
+
 function PerformanceMonitor() {
     const { gl, scene, renderer } = useThree()
 
@@ -37,32 +38,6 @@ function PerformanceMonitor() {
     }, [gl, scene])
 
     return null
-}
-
-function EclipticGrid() {
-    const gridRef = useRef()
-
-    useEffect(() => {
-        return () => {
-            if (gridRef.current) {
-                gridRef.current.geometry.dispose()
-                gridRef.current.material.dispose()
-            }
-        }
-    }, [])
-
-    return (
-        <polarGridHelper
-            ref={gridRef}
-            args={[2000, 16, 20, 0x444444, 0x444444]}
-            position={[0, 0, 0]}
-            onUpdate={(self) => {
-                self.material.transparent = true
-                self.material.opacity = 0.1
-                self.material.depthWrite = false
-            }}
-        />
-    )
 }
 
 export default function Scene({ onPlanetSelect, activePlanet, started }) {
@@ -92,8 +67,9 @@ export default function Scene({ onPlanetSelect, activePlanet, started }) {
                 minDistance={5}
                 maxDistance={500}
                 enableDamping
-                dampingFactor={0.05}
-                enabled={false}
+                dampingFactor={0.1}
+                rotateSpeed={0.5}
+                enabled={true}
             />
 
             <Sun position={[0, 0, 0]} />
@@ -114,8 +90,8 @@ export default function Scene({ onPlanetSelect, activePlanet, started }) {
             <AsteroidBelt />
             <Starfield count={100000} />
 
-            {/* Celestial Grid (Ecliptic Plane) */}
-            <EclipticGrid />
+
+
         </Canvas>
     )
 }

@@ -111,8 +111,11 @@ export default function CameraRig({ planets, activePlanet, controlsRef }) {
         }
     }, [activePlanet, camera, controlsRef])
 
+    // Track previous target to apply delta to camera
+    const prevTarget = useRef(new THREE.Vector3(0, 0, 0))
+
     useFrame((state, delta) => {
-        // If active planet, let OrbitControls handle camera (update needed?)
+        // If active planet, let OrbitControls handle everything standardly
         if (activePlanet) {
             controlsRef.current.update()
             return
@@ -122,21 +125,38 @@ export default function CameraRig({ planets, activePlanet, controlsRef }) {
         progress.current = THREE.MathUtils.damp(progress.current, targetProgress.current, 2, delta)
         const p = progress.current
 
-        if (p < 0 || p > 1) return
-
-        const point = curve.getPointAt(p)
+        // Get point on curve (The FOCUS point, not the camera position)
+        const targetPoint = curve.getPointAt(p)
         const dampFactor = 5
 
-        // eslint-disable-next-line react-hooks/immutability
-        camera.position.x = THREE.MathUtils.damp(camera.position.x, point.x, dampFactor, delta)
-        // eslint-disable-next-line react-hooks/immutability
-        camera.position.y = THREE.MathUtils.damp(camera.position.y, point.y, dampFactor, delta)
-        // eslint-disable-next-line react-hooks/immutability
-        camera.position.z = THREE.MathUtils.damp(camera.position.z, point.z, dampFactor, delta)
+        // Smoothly move the CONTROLS TARGET
+        // We use a temp vector to calculate the smooth step first? 
+        // Or just damp the target directly? 
+        // Damp target directly is risky if we need delta.
+        // Let's rely on the smooth curve point as the authoritative target
+        // But we want damp logic. 
 
-        const lookAtT = Math.min(p + 0.02, 1)
-        const lookAtPoint = curve.getPointAt(lookAtT)
-        camera.lookAt(lookAtPoint)
+        // Let's calculate the "Ideal Target" (Smoothed Progress)
+        // prevTarget needs to track the ACTUAL controls.target to get the physical delta
+        // No, simplest is:
+        // 1. Calculate actual move required for target
+
+        // We handle smoothing via 'progress' damping above. 
+        // So targetPoint IS the smoothed target position.
+
+        const moveDelta = new THREE.Vector3().subVectors(targetPoint, prevTarget.current)
+
+        // Apply delta to Camera (Follow the target)
+        camera.position.add(moveDelta)
+
+        // Apply to Controls Target
+        if (controlsRef.current) {
+            controlsRef.current.target.copy(targetPoint)
+            controlsRef.current.update() // Important for damping
+        }
+
+        // Update previous
+        prevTarget.current.copy(targetPoint)
     })
 
     return null

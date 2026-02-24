@@ -5,30 +5,51 @@ export default function Starfield({ count = 100000 }) {
     const mesh = useRef()
     const dummy = useMemo(() => new THREE.Object3D(), [])
 
-    // Generate 100k stable random positions
+    // Generate 100k particles simulating a Milky Way galaxy
     const particles = useMemo(() => {
+        /* eslint-disable react-hooks/purity */
         const data = []
         for (let i = 0; i < count; i++) {
-            // Distribute in a visible range (Background layer)
-            // Z-depth needs to be huge for parallax feel, but careful with frustum culling
-            const r = 1000 + Math.random() * 2000 // 1000 to 3000 units away
-            const theta = 2 * Math.PI * Math.random()
-            const phi = Math.acos(2 * Math.random() - 1)
+            // Galaxy Logic
+            // 60% in the Disk (Band), 40% in Sphere (Halo)
+            const isDisk = Math.random() < 0.6
 
-            const x = r * Math.sin(phi) * Math.cos(theta)
-            const y = r * Math.sin(phi) * Math.sin(theta)
-            const z = r * Math.cos(phi)
+            let x, y, z
 
-            const scale = 0.2 + Math.random() * 0.8 // Varies size
+            if (isDisk) {
+                // Disk: Wide Radius, Thin Height
+                const r = 1500 + Math.random() * 2500 // 1500-4000 distance
+                const theta = Math.random() * Math.PI * 2
+
+                // Concentration in the plane (Gaussian-ish)
+                const ySpread = Math.pow(Math.random(), 3) * 300 * (Math.random() < 0.5 ? 1 : -1)
+
+                x = r * Math.cos(theta)
+                y = ySpread // Thin vertical band
+                z = r * Math.sin(theta)
+            } else {
+                // Sphere: Background stars
+                const r = 2000 + Math.random() * 3000
+                const theta = 2 * Math.PI * Math.random()
+                const phi = Math.acos(2 * Math.random() - 1)
+
+                x = r * Math.sin(phi) * Math.cos(theta)
+                y = r * Math.sin(phi) * Math.sin(theta)
+                z = r * Math.cos(phi)
+            }
+
+            const scale = 0.5 + Math.random() * 1.5 // Larger stars
 
             data.push({ x, y, z, scale })
         }
+        /* eslint-enable react-hooks/purity */
         return data
     }, [count])
 
     useLayoutEffect(() => {
         if (!mesh.current) return
 
+        /* eslint-disable react-hooks/purity */
         // Fill the instance matrix
         particles.forEach((particle, i) => {
             dummy.position.set(particle.x, particle.y, particle.z)
@@ -37,15 +58,22 @@ export default function Starfield({ count = 100000 }) {
             dummy.updateMatrix()
             mesh.current.setMatrixAt(i, dummy.matrix)
 
-            // Randomize color: mostly white/blueish, some rare red giants
+            // Star Color Classification:
+            // 60% White/Blue-White (Young stars)
+            // 20% Yellow/Gold (Sun-like)
+            // 20% Red/Orange (Giants)
             const color = new THREE.Color()
-            if (Math.random() > 0.95) {
-                color.setHSL(Math.random() * 0.1, 0.8, 0.8) // Red/Orange tint
+            const r = Math.random()
+            if (r > 0.8) {
+                color.setHSL(Math.random() * 0.1, 0.8, 0.6) // Red/Orange
+            } else if (r > 0.6) {
+                color.setHSL(0.1 + Math.random() * 0.05, 0.6, 0.7) // Gold
             } else {
                 color.setHSL(0.6 + Math.random() * 0.1, 0.2, 0.9) // Blue/White
             }
             mesh.current.setColorAt(i, color)
         })
+        /* eslint-enable react-hooks/purity */
 
         mesh.current.instanceMatrix.needsUpdate = true
         if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true
